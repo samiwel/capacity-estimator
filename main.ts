@@ -6,12 +6,14 @@ const url = Deno.env.get("CALENDAR_URL");
 interface TeamMember {
   name: string;
   email: string;
+  capacity: number;
 }
 
 const teamMembers: TeamMember[] = [
   {
     name: "Samiwel Thomas",
     email: "samiwel.thomas@digital.homeoffice.gov.uk",
+    capacity: 6,
   },
 ];
 
