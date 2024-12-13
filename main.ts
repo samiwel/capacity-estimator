@@ -1,5 +1,6 @@
 import { KalenderEvents } from "npm:kalender-events";
 import * as dateFns from "https://deno.land/x/date_fns@v2.6.0/index.js";
+import chalk from "https://deno.land/x/chalk_deno@v4.1.1-deno/source/index.js";
 
 const url = Deno.env.get("CALENDAR_URL");
 
@@ -13,7 +14,7 @@ const teamMembers: TeamMember[] = [
   {
     name: "Samiwel Thomas",
     email: "samiwel.thomas@digital.homeoffice.gov.uk",
-    capacity: 6,
+    capacity: 10,
   },
 ];
 
@@ -94,6 +95,43 @@ const daysOfNextSprint = dateFns
 //
 //
 // Total the remaining capacity for the entire team.
+//
 
-console.log(eventStart);
-console.log(eventEnd);
+teamEvents.forEach((event) => {
+  if (event.categories.includes("leaves")) {
+    daysOfNextSprint.forEach((day) => {
+      const dayInterval = {
+        start: dateFns.startOfDay(day),
+        end: dateFns.endOfDay(day),
+      };
+
+      const eventInterval = {
+        start: event.eventStart,
+        end: event.eventEnd,
+      };
+
+      if (dateFns.areIntervalsOverlapping(dayInterval, eventInterval)) {
+        const teamMember = teamMembers.find(
+          (tm) =>
+            tm.email ===
+            event.organizer.val.replace("mailto:", "").toLowerCase(),
+        );
+
+        if (teamMember) {
+          console.log(`Reducing ${teamMember?.name} capacity by 1`);
+          teamMember.capacity = Math.max(teamMember.capacity - 1, 0);
+        }
+      }
+    });
+  }
+});
+
+console.log(teamMembers.map((tm) => tm.capacity));
+
+console.log(
+  `Team capacity in the next sprint is estimated to be ${chalk.green(
+    teamMembers.reduce((prev, curr) => {
+      return prev + curr.capacity;
+    }, 0),
+  )}`,
+);
